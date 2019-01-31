@@ -7,6 +7,7 @@ var {Todo}=require('./models/todo');
 var {User}=require('./models/user');
 
 var app=express();
+const port=process.env.PORT || 80;
 
 app.use(bodyParser.json());
 app.post('/todos',(req,res)=>{
@@ -45,6 +46,6 @@ app.get('/todos/:id',(req,res)=>{
 module.exports ={app};
 
 
-app.listen(3000,()=>{
-  console.log('Server Started At port 3000');
+app.listen(port,()=>{
+  console.log(`Server Started At port ${port}`);
 });
