@@ -2,6 +2,7 @@ const mongoose=require('mongoose');
 const validator=require('validator');
 const jwt= require('jsonwebtoken');
 const _=require('lodash');
+const bcrypt=require('bcryptjs');
 
 var UserSchema=new mongoose.Schema({
 email:{
@@ -54,21 +55,41 @@ return user.save().then(()=>{
 UserSchema.statics.findByToken=function (token) {
   var User=this;
   var decoded;
-
   try {
     decoded=jwt.verify(token,"abc123");
   } catch (e) {
-
+    return Promise.reject();
   }
-
 return  User.findOne({
     '_id':decoded,
     'tokens.token':token,
     'tokens.access':'auth'
   });
-
-
 };
+
+UserSchema.pre('save',function(next){
+var user=this;
+if(user.isModified())
+{
+  var password=user.password;
+  bcrypt.genSalt(10,(err,salt)=>{
+    bcrypt.hash(password,salt,(err,hash)=>{
+      if(err)
+      {
+        next();
+      }else {
+        user.password=hash;
+        next();
+      }
+
+    });
+  });
+
+}
+else {
+  next();
+}
+})
 
 
 var User=mongoose.model('User',UserSchema);
